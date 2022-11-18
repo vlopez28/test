@@ -3,86 +3,58 @@ package TPEspecial;
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class ListaVinculada  implements Iterable<Comparable>{
-	protected Nodo primero; // estaria bien poner protected para acceder desde clase iterador
-	protected int tamanio;///tiene que tener un atributo tamanio?
-	protected Comparator criterio;
+public class ListaVinculada<T> implements Iterable<T>{
+	private Nodo<T> primero; 
+	private int tamanio;
+	private Comparator<T> criterio;
 	
-	public ListaVinculada(Comparator c) {
+	public ListaVinculada (Comparator<T> c) {
 		this.criterio = c;
 		primero = null;
 		tamanio = 0;
 	}
-	public ListaVinculada(Comparator c, Nodo n) {
+	public ListaVinculada(Comparator<T> c, Nodo<T> n) {
 		this.criterio = c;
 		this.primero = n;
 		this.tamanio = 1;
 	}
-	public void setComparador(Comparator c) {
-		this.criterio = c;
-		this.reordenarLista(c);//esta bien ponerlo aca?
-	}
-	
-	public Nodo getPrimero() {
+	private Nodo<T> getPrimero() {
 		return primero;
 	}
-	public int verTamanio() {
+	public int getTamanio() {
 		return tamanio;
 	}
-	//es necesario este metodo?
-	public boolean estaVaciaLista() {
-		if(primero == null)
-			return true;
-		return false;
+	public void setComparador(Comparator<T> c) {
+		this.criterio = c;
+		this.reordenarLista();
 	}
 	
-	public String imprimirLista() {
-		Nodo actual = primero;
-		String resultado = "[";
-		if(this.estaVaciaLista()) {
-			return "[]";
-		}
-		do {
-			resultado += actual.getValor()+", ";
-			actual = actual.obtenerSiguiente();
-		} while(actual != null);
-		
-		return resultado + "]";
-	}
+	private void reordenarLista() {
+	     Nodo<T> aux = primero;
+	     tamanio = 0;
+	     primero = null;
+	     while (aux!= null) {
+	    	this.insertar(aux.getValor());
+	    	aux = aux.obtenerSiguiente();
+	    }
+	} 
 	
-	public Comparable obtenerObjeto(int pos) {
-		int contador = 0;
-		if(this.estaVaciaLista()) {
-			return null; //esta bien retornar null? si no hya obejcto que retorno??
-		}
-		Nodo temp = primero;
-		while(contador < pos && temp != null) {
-			temp = temp.obtenerSiguiente();
-			contador++;
-		} 
-		if(temp == null) {
-			return null; // no hay objeto en esa posicion
-		}
-		return temp.getValor();
-	}
-	
-	
-	public void insertar(Comparable comp) {
-		Nodo nuevo = new Nodo(comp);
+	public void insertar(T valor) {
+		Nodo<T> nuevo = new Nodo<T>(valor);
 		if(primero == null) {
 			primero = nuevo;
 		} else {
-			Nodo actual = primero;
-			boolean encontro = false; ////1 3 .. 8 9 .. quiero insertar 5
+			Nodo<T> actual = primero;
+			boolean encontro = false; 
 			int res = criterio.compare(actual.getValor(), nuevo.getValor());
-			if(res >= 1) {//el actual es mayor ... caso en que sea 0
+			if(res >= 1) {
 				nuevo.enlazarSiguiente(actual);
 				primero = nuevo;
 			} else {
 				while(actual.obtenerSiguiente() != null && !encontro) {
 					res = criterio.compare(actual.obtenerSiguiente().getValor(), nuevo.getValor());
 					if(res >= 1) {
-						Nodo temp = actual.obtenerSiguiente();
+						Nodo<T> temp = actual.obtenerSiguiente();
 						actual.enlazarSiguiente(nuevo);
 						nuevo.enlazarSiguiente(temp);
 						encontro = true;
@@ -97,71 +69,52 @@ public class ListaVinculada  implements Iterable<Comparable>{
 		}
 		tamanio++;
 	}
-	//validar metodo eliminar
-	public String eliminarEnPosicion(int pos) { //1 5 10 11 21...tamanio 5.. elimianr pos 0
-		if(pos >= tamanio) { // esto esta bien ?
-			return "no existe pos"; // que retorna si la pos es mayor al tamanio y no se puede borrar?
-		}
-		else {
-			Nodo actual = primero;
-			int contador  = 1;
-			while(contador < pos && actual != null) {
-				actual = actual.obtenerSiguiente();
-				contador++;
-			}
-			if(contador == pos) { //sale xq encontro pos
-				actual.enlazarSiguiente(actual.obtenerSiguiente().obtenerSiguiente());
-				System.out.println("elimino: ");
-			}
-			else if(pos == 0) { //sale porque pos es cero
-				actual = actual.obtenerSiguiente();
-				primero = actual;
-			}
-		}
-		tamanio--;
-		
-		return "eliminado con exito";
-	}
-	//no retorna nada si no hay pos no elimina y no hace nada no retorna nada
-	public void eliminarEnPosicionMejorado(int pos) { //VALIDAR
-		Nodo actual = primero;
+	
+	
+	public void eliminarEnPosicion(int pos) { 
+		Nodo<T> actual = primero;
 		int contador  = 1;
 		if(pos == 0) {
-			System.out.println("hola");
 			actual = actual.obtenerSiguiente();
 			primero = actual;
+			tamanio--;
 			return;
 		}
 		while(contador < pos && actual != null) {
 			actual = actual.obtenerSiguiente();
 			contador++;
 		}
-		if(contador == pos) { //sale xq encontro pos, si el contado es igual a pos significa que no es null
+		if(contador == pos) { 
 			actual.enlazarSiguiente(actual.obtenerSiguiente().obtenerSiguiente());
+			tamanio--;
 		} 
-		tamanio--;
 	}
 	
-	public void eliminarTodasOcurrencias(Comparable elem) {
-		Nodo actual = primero;
-		while(actual != null) {		
-			if(actual.getValor().equals(elem)) {//si es un int esto funciona???
-				int posABorrar = this.obtenerPosElem(actual.getValor()); // busco pos xq al borrar cambia
-				actual = actual.obtenerSiguiente();
-				this.eliminarEnPosicionMejorado(posABorrar);
-			} else {
-				actual = actual.obtenerSiguiente();
-			}
+	public void eliminarTodasOcurrencias(T elem) {
+		Nodo<T> actual = primero;
+		Nodo<T> anterior = primero;
+		while(!actual.getValor().equals(elem)) {
+			anterior = actual;
+			actual = actual.obtenerSiguiente();
+		}
+		while(actual.getValor().equals(elem)) {
+			actual = actual.obtenerSiguiente();
+		}
+		if(primero.getValor().equals(elem)) { 
+			primero = actual;
+		} else {
+			anterior.enlazarSiguiente(actual);
 		}
 	}
 	
-	public int obtenerPosElem(Comparable elem) {
+	
+	public int obtenerPosElem(T elem) {
 		int posicion = 0;
 		if(primero == null) {
-			return -1; //esta bien retornar null?
+			return -1; 
 		}
-		Nodo temp = primero;
-		while(posicion < tamanio && temp != null) {
+		Nodo<T> temp = primero;
+		while(posicion < getTamanio() && temp != null) {
 			if(temp.getValor().equals(elem)) {
 				return posicion;
 			} else {
@@ -172,42 +125,21 @@ public class ListaVinculada  implements Iterable<Comparable>{
 		return -1;
 	}
 	
-	public void reordenarLista(Comparator c) {
-		ListaVinculada reordenada = new ListaVinculada(c);
-		for (Comparable elem:this) {
-			reordenada.insertar(elem);
-		}
-		primero = reordenada.getPrimero();
-	}
 	
 	@Override
-	public Iterator<Comparable> iterator() {	
-		return new IteradorComparable();
+	public Iterator<T> iterator() {	
+		return new IteradorLista<T>(primero);
 	}
-	//--------------------------------------------//
-	private class IteradorComparable implements Iterator<Comparable>{
-		
-		Nodo actual;
-		int pos;
-		
-		public IteradorComparable() {
-			actual = primero;
-			pos = 0;
-		}
 
-		@Override
-		public boolean hasNext() {
-			if(pos < tamanio)//esta bien usar el tamanio
-				return true;
-			return false;
+	public String toString() {
+		int contador = 1;
+		String res = "{ tamanio: "+getTamanio();
+		
+		for(T e: this) { 
+			res+= "\n Elemento num: "+contador+ "\n"+e.toString();
+			contador ++;
 		}
-
-		@Override
-		public Comparable next() {
-			pos++;
-			Comparable aux = obtenerObjeto(pos-1); 
-			actual = actual.obtenerSiguiente();
-			return aux;
-		}
+		return res + "}";
 	}
+	
 }

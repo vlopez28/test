@@ -2,22 +2,20 @@ package TPEspecial;
 
 import java.util.ArrayList;
 
-public class Alumno implements Comparable<Alumno>{
-	private String nombre;
+public class Alumno extends ElementoUniversidad {
+
 	private String apellido;
 	private int dni;
 	private int edad;
-	private ArrayList<String> intereses; //se puede usar aca el arra?? o usar la lista??
+	private ArrayList<String> intereses; 
 	public Alumno(String nombre, String apellido, int dni, int edad) {
-		this.nombre = nombre;
+		super(nombre);
 		this.apellido = apellido;
 		this.dni = dni;
 		this.edad = edad;
 		this.intereses = new ArrayList<>();
 	}
-	public String getNombre() {
-		return nombre;
-	}
+	
 	public String getApellido() {
 		return apellido;
 	}
@@ -27,9 +25,7 @@ public class Alumno implements Comparable<Alumno>{
 	public int getEdad() {
 		return edad;
 	}
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+	
 	public void setApellido(String apellido) {
 		this.apellido = apellido;
 	}
@@ -46,22 +42,21 @@ public class Alumno implements Comparable<Alumno>{
 	public boolean equals(Object o) {
 		try {
 			Alumno otro = (Alumno)o;
-			return this.getApellido().equals(otro.getApellido()) &&
-					this.getNombre().equals(otro.getNombre()) &&
-					this.getDni() == otro.getDni();
+			return this.getDni() == otro.getDni();
 		}
 		catch(Exception e) {
 			return false;
 		}
 	}
-	@Override
-	public int compareTo(Alumno o) {
-		
-		return this.getEdad() - o.getEdad();
-	}
+	
 	@Override
 	public String toString() {
-		return "Alumno [nombre=" + nombre + ", apellido=" + apellido + ", dni=" + dni + ", edad=" + edad + "]";
+		return "Alumno [nombre=" + this.getNombre() + ", apellido=" + apellido + "]\n";
 	}
+	@Override
+	public int getCantidadAlumnos() {
+		return 1;
+	}
+
 	
 }
